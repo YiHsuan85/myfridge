@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  
+  /* Map standard tailwind color codes to Apple UI Human Interface colors */
+  --color-emerald-500: #34C759;
+  --color-emerald-600: #28CD41;
+  --color-emerald-400: #30D158;
+  
+  --color-amber-55: #FF9500;
+  --color-amber-500: #FF9500;
+  --color-amber-600: #FF9F0A;
+  --color-amber-400: #FF9F0A;
+  
+  --color-rose-500: #FF3B30;
+  --color-rose-600: #FF453A;
+  --color-rose-400: #FF453A;
+  
+  --color-cyan-500: #007AFF;
+  --color-cyan-600: #0A84FF;
+  --color-cyan-400: #0A84FF;
+
+  --color-blue-500: #007AFF;
+  --color-blue-600: #0A84FF;
+  --color-blue-400: #0A84FF;
+}
+
+/* Base styles for Apple UI Minimalist background and smooth system-fonts */
+html, body {
+  background-color: #F2F2F7;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1C1C1E;
+}
+
+/* In dark mode, set appropriate pure iOS backgrounds */
+html.dark, html.dark body {
+  background-color: #000000 !important;
+  color: #F2F2F7 !important;
+}
+
+/* Hide scrollbars elegantly */
+.scroll-hide::-webkit-scrollbar {
+  display: none;
+}
+.scroll-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Beautiful iOS Card styling for White/Slate cards */
+.bg-white {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Premium Dark Mode card support */
+.dark .bg-zinc-900, .dark .bg-white {
+  background: rgba(28, 28, 30, 0.8) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* General Apple status pill transitions */
+.transition-all {
+  transition-duration: 250ms !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
