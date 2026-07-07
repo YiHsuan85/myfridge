@@ -1,0 +1,6 @@
+{
+  "name": "My Fridge",
+  "description": "基於 Apple Human Interface Design 風格的現代化、簡潔、高質感 AI 冰箱管理系統。支援個人化登入、食物有效期限追蹤、智慧拍照 OCR 辨識，與自動化採購清單。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
