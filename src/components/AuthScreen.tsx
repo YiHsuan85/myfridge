@@ -1,55 +1,53 @@
 import React, { useState } from "react";
 import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signInAnonymously 
+  signInAnonymously,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "firebase/auth";
 import { auth } from "../firebase";
 import { motion } from "motion/react";
-import { Refrigerator, Mail, Lock, LogIn, UserPlus, Sparkles, AlertCircle, ArrowRight } from "lucide-react";
+import { 
+  Refrigerator, 
+  Sparkles, 
+  AlertCircle, 
+  ArrowRight,
+  Monitor
+} from "lucide-react";
 
 interface AuthScreenProps {
   onLocalLogin: (localUser: { uid: string; email: string; isAnonymous: boolean }) => void;
 }
 
+const GoogleIcon = () => (
+  <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05" />
+    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+  </svg>
+);
+
 export default function AuthScreen({ onLocalLogin }: AuthScreenProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showLocalFallbackBtn, setShowLocalFallbackBtn] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setError("請填寫所有欄位");
-      return;
-    }
+  const handleGoogleLogin = async () => {
     setError("");
     setLoading(true);
-
     try {
-      if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-      }
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
     } catch (err: any) {
       console.error(err);
-      setShowLocalFallbackBtn(true);
-      if (err.code === "auth/email-already-in-use") {
-        setError("此 Email 已被註冊。");
-      } else if (err.code === "auth/weak-password") {
-        setError("密碼強度不足，至少需要 6 個字元。");
-      } else if (err.code === "auth/invalid-email") {
-        setError("請輸入正確格式的 Email。");
-      } else if (err.code === "auth/user-not-found" || err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
-        setError("帳號或密碼錯誤。");
+      if (err.code === "auth/popup-blocked") {
+        setError("登入視窗被瀏覽器封鎖，請允許本網域的快顯視窗後重試。");
+      } else if (err.code === "auth/popup-closed-by-user") {
+        setError("登入視窗已被關閉。");
       } else if (err.code === "auth/operation-not-allowed") {
-        setError("Firebase 控制台尚未啟用此登入方式。您可以點擊下方「切換為本機極速體驗」直接免設定開始使用！");
+        setError("Firebase 控制台尚未啟用 Google 登入方式。請在 Firebase 啟用 Google Provider。");
       } else {
-        setError("Firebase 登入失敗: " + err.message + "。建議切換為下方「本機極速體驗」直接使用！");
+        setError("Google 登入失敗: " + err.message + "。建議點擊下方「快速體驗」直接免設定開始！");
       }
     } finally {
       setLoading(false);
@@ -112,103 +110,48 @@ export default function AuthScreen({ onLocalLogin }: AuthScreenProps) {
           </motion.div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
-          <div>
-            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1 ml-1">
-              電子郵件 Email
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400 dark:text-zinc-500 pointer-events-none">
-                <Mail className="w-4 h-4" />
-              </span>
-              <input
-                id="auth-email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@gmail.com"
-                className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-150 dark:border-zinc-800 text-zinc-850 dark:text-zinc-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-1 ml-1">
-              密碼 Password
-            </label>
-            <div className="relative">
-              <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 text-zinc-400 dark:text-zinc-500 pointer-events-none">
-                <Lock className="w-4 h-4" />
-              </span>
-              <input
-                id="auth-password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="請輸入密碼 (6位數以上)"
-                className="w-full pl-10 pr-4 py-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-150 dark:border-zinc-800 text-zinc-850 dark:text-zinc-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
-              />
-            </div>
-          </div>
-
+        {/* Main Action Buttons */}
+        <div className="space-y-3.5 relative z-10 mb-6">
+          {/* Google Sign In (Primary / Bind Google option) */}
           <button
-            id="auth-submit-btn"
-            type="submit"
+            id="auth-google-btn"
+            type="button"
+            onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:bg-emerald-350 text-white font-medium py-3 rounded-2xl text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/20 transition-all cursor-pointer"
+            className="w-full py-3.5 px-4 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-750 text-zinc-700 dark:text-zinc-200 font-semibold rounded-2xl text-sm flex items-center justify-center gap-3 transition-all cursor-pointer border border-zinc-200 dark:border-zinc-700 shadow-sm hover:shadow-md"
           >
             {loading ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : isSignUp ? (
-              <>
-                <UserPlus className="w-4 h-4" />
-                註冊並登入
-              </>
+              <span className="inline-block w-4 h-4 border-2 border-zinc-500 border-t-transparent rounded-full animate-spin" />
             ) : (
-              <>
-                <LogIn className="w-4 h-4" />
-                登入系統
-              </>
+              <GoogleIcon />
             )}
+            使用 Google 帳號登入 / 註冊
           </button>
-        </form>
 
-        <div className="relative my-6 text-center z-10">
-          <div className="absolute inset-y-1/2 left-0 right-0 border-t border-zinc-100 dark:border-zinc-800 -z-10" />
-          <span className="bg-white dark:bg-zinc-900 px-3 text-xs text-zinc-400">或</span>
-        </div>
-
-        <div className="space-y-3 relative z-10">
+          {/* Guest / Quick Experience (快速體驗) */}
           <button
             id="auth-anon-btn"
             type="button"
             onClick={handleAnonymousLogin}
             disabled={loading}
-            className="w-full py-3 bg-emerald-50 dark:bg-emerald-950/20 hover:bg-emerald-100 dark:hover:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 font-semibold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-2xl text-sm flex items-center justify-center gap-2.5 transition-all cursor-pointer shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-emerald-100" />
             快速體驗 (免註冊試用)
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4 ml-0.5 text-emerald-100" />
           </button>
+        </div>
 
+        <div className="mt-6 relative z-10">
+          {/* Backup offline mode button */}
           <button
             id="auth-local-fallback-btn"
             type="button"
             onClick={handleManualLocalLogin}
-            className="w-full py-3 bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-950/30 text-blue-600 dark:text-blue-400 font-semibold rounded-2xl text-sm flex items-center justify-center gap-2 transition-all cursor-pointer border border-blue-100/40 dark:border-blue-900/20"
+            className="w-full py-3 bg-blue-50/50 dark:bg-blue-950/10 hover:bg-blue-100/40 dark:hover:bg-blue-950/20 text-blue-600 dark:text-blue-400 font-semibold rounded-2xl text-xs flex items-center justify-center gap-2 transition-all cursor-pointer border border-blue-100/30 dark:border-blue-900/10 shadow-sm"
           >
-            🚀 本機獨立儲存模式 (極速/免連網)
-          </button>
-
-          <button
-            id="auth-toggle-mode-btn"
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="w-full text-center text-xs text-zinc-500 hover:text-emerald-500 transition-colors"
-          >
-            {isSignUp ? "已經有帳號了？ 立即登入" : "還沒有帳號？ 立即註冊帳號"}
+            <Monitor className="w-3.5 h-3.5" />
+            💻 極速本機獨立儲存模式 (免連網/免帳號)
           </button>
         </div>
       </motion.div>
