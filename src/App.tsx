@@ -18,7 +18,7 @@ import { Ingredient, ShoppingItem, UserSettings } from "./types";
 // Screens / Components
 import AuthScreen from "./components/AuthScreen";
 import Dashboard from "./components/Dashboard";
-import RefrigeratorView from "./components/RefrigeratorView";
+import RefrigeratorView from "./components/RefridgeratorView";
 import ShoppingListScreen from "./components/ShoppingListScreen";
 import SettingsScreen from "./components/SettingsScreen";
 import AddIngredientModal from "./components/AddIngredientModal";
