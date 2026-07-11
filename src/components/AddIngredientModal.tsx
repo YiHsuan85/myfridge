@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Ingredient, CommonFoodTemplate, UserSettings } from "../types";
-import { COMMON_FOODS } from "../constants/foods";
+import { COMMON_FOODS } from "../constants/food";
 import { 
   X, 
   Search, 
