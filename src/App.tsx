@@ -26,7 +26,7 @@ import AddIngredientModal from "./components/AddIngredientModal";
 // Icons
 import { 
   LayoutDashboard, 
-  Refrigerator, 
+  Refridgerator, 
   Settings, 
   Plus, 
   Sparkles,
@@ -107,7 +107,7 @@ export default function App() {
     if (user) {
       const uid = user.uid;
 
-      // A. Sync Refrigerator Ingredients (Ordered by expiry date ascending)
+      // A. Sync Refridgerator Ingredients (Ordered by expiry date ascending)
       const ingredientsQuery = query(
         collection(db, "users", uid, "ingredients"),
         orderBy("expiryDate", "asc")
@@ -485,7 +485,7 @@ export default function App() {
               {getGreeting()}
             </span>
             <h1 className="text-xl font-black font-sans tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-1.5">
-              <Refrigerator className="w-5.5 h-5.5 text-emerald-500 dark:text-emerald-400" />
+              <Refridgerator className="w-5.5 h-5.5 text-emerald-500 dark:text-emerald-400" />
               我的冰箱
             </h1>
           </div>
@@ -518,7 +518,7 @@ export default function App() {
           )}
 
           {currentTab === "fridge" && (
-            <RefrigeratorView
+            <RefridgeratorView
               ingredients={ingredients}
               onUpdateIngredient={handleUpdateIngredient}
               onDeleteIngredient={handleDeleteIngredient}
@@ -597,7 +597,7 @@ export default function App() {
                 : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
             }`}
           >
-            <Refrigerator className="w-5.5 h-5.5" />
+            <Refridgerator className="w-5.5 h-5.5" />
             <span className="text-[10px] font-bold">我的冰箱</span>
           </button>
 
