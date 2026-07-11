@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { onAuthStateChanged, User, signOut } from "firebase/auth";
+import { onAuthStateChanged, User, signOut } from "firebase/auths";
 import { 
   collection, 
   onSnapshot, 
