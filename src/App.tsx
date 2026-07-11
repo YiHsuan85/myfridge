@@ -113,12 +113,36 @@ export default function App() {
         orderBy("expiryDate", "asc")
       );
       
-      const unsubscribeIngredients = onSnapshot(ingredientsQuery, (snapshot) => {
+      let ingredientsInitialized = false;
+      let shoppingInitialized = false;
+
+      const unsubscribeIngredients = onSnapshot(ingredientsQuery, async (snapshot) => {
         const items: Ingredient[] = [];
         snapshot.forEach((doc) => {
           items.push({ id: doc.id, ...doc.data() } as Ingredient);
         });
         setIngredients(items);
+
+        if (!ingredientsInitialized) {
+          ingredientsInitialized = true;
+          const seedFlag = `db_seeded_v3_${uid}`;
+          if (snapshot.empty && localStorage.getItem(seedFlag) !== "true") {
+            try {
+              const colRef = collection(db, "users", uid, "ingredients");
+              await addDoc(colRef, {
+                name: "牛奶",
+                category: "fridge",
+                quantity: 1,
+                expiryDate: "2026-07-11",
+                notes: "即期品",
+                userId: uid,
+                createdAt: new Date().toISOString()
+              });
+            } catch (err) {
+              console.error("Error seeding default ingredient:", err);
+            }
+          }
+        }
       }, (error) => {
         console.error("Error syncing ingredients from Firestore:", error);
       });
@@ -128,12 +152,33 @@ export default function App() {
         collection(db, "users", uid, "shoppingList"),
         orderBy("createdAt", "desc")
       );
-      const unsubscribeShopping = onSnapshot(shoppingQuery, (snapshot) => {
+      const unsubscribeShopping = onSnapshot(shoppingQuery, async (snapshot) => {
         const items: ShoppingItem[] = [];
         snapshot.forEach((doc) => {
           items.push({ id: doc.id, ...doc.data() } as ShoppingItem);
         });
         setShoppingItems(items);
+
+        if (!shoppingInitialized) {
+          shoppingInitialized = true;
+          const seedFlag = `db_seeded_v3_${uid}`;
+          if (snapshot.empty && localStorage.getItem(seedFlag) !== "true") {
+            try {
+              const colRef = collection(db, "users", uid, "shoppingList");
+              await addDoc(colRef, {
+                name: "希臘優格（4入）",
+                completed: false,
+                userId: uid,
+                createdAt: new Date().toISOString()
+              });
+              localStorage.setItem(seedFlag, "true");
+            } catch (err) {
+              console.error("Error seeding default shopping item:", err);
+            }
+          } else if (!snapshot.empty) {
+            localStorage.setItem(seedFlag, "true");
+          }
+        }
       }, (error) => {
         console.error("Error syncing shopping items:", error);
       });
@@ -170,6 +215,15 @@ export default function App() {
       };
     } else if (localUser) {
       const uid = localUser.uid;
+      const seedFlag = `local_seeded_v3_${uid}`;
+      
+      // If we haven't seeded the v3 layout yet, clear the old keys to force seed
+      if (localStorage.getItem(seedFlag) !== "true") {
+        localStorage.removeItem(`local_ingredients_${uid}`);
+        localStorage.removeItem(`local_shopping_${uid}`);
+        localStorage.setItem(seedFlag, "true");
+      }
+
       const savedIngredients = localStorage.getItem(`local_ingredients_${uid}`);
       const savedShopping = localStorage.getItem(`local_shopping_${uid}`);
       const savedSettings = localStorage.getItem(`local_settings_${uid}`);
@@ -177,77 +231,14 @@ export default function App() {
       if (savedIngredients) {
         setIngredients(JSON.parse(savedIngredients));
       } else {
-        // High quality design mockup foods
-        const initialIngredients = [
+        const initialIngredients: Ingredient[] = [
           {
-            id: "local_1",
-            name: "有機小松菜",
-            category: "蔬菜",
-            quantity: 2,
-            unit: "包",
-            expiryDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-            storage: "fridge",
-            location: "第三層",
-            userId: uid,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "local_2",
-            name: "全脂牛奶",
-            category: "乳品",
+            id: "local_milk",
+            name: "牛奶",
+            category: "fridge",
             quantity: 1,
-            unit: "瓶",
-            expiryDate: new Date().toISOString().split('T')[0],
-            storage: "fridge",
-            location: "門架",
-            userId: uid,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "local_3",
-            name: "澳洲肋眼牛排",
-            category: "肉類",
-            quantity: 350,
-            unit: "g",
-            expiryDate: new Date(Date.now() + 2 * 86400000).toISOString().split('T')[0],
-            storage: "fridge",
-            location: "生鮮層",
-            userId: uid,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "local_4",
-            name: "富士蘋果",
-            category: "水果",
-            quantity: 4,
-            unit: "顆",
-            expiryDate: new Date(Date.now() + 12 * 86400000).toISOString().split('T')[0],
-            storage: "fridge",
-            location: "水果箱",
-            userId: uid,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "local_5",
-            name: "土雞蛋",
-            category: "蛋類",
-            quantity: 6,
-            unit: "顆",
-            expiryDate: new Date(Date.now() + 8 * 86400000).toISOString().split('T')[0],
-            storage: "fridge",
-            location: "門架",
-            userId: uid,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "local_6",
-            name: "切達起司片",
-            category: "乳品",
-            quantity: 10,
-            unit: "片",
-            expiryDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
-            storage: "fridge",
-            location: "第三層",
+            expiryDate: "2026-07-11",
+            notes: "即期品",
             userId: uid,
             createdAt: new Date().toISOString()
           }
@@ -259,10 +250,14 @@ export default function App() {
       if (savedShopping) {
         setShoppingItems(JSON.parse(savedShopping));
       } else {
-        const initialShopping = [
-          { id: "local_shop_1", name: "希臘優格 (4入)", completed: false, userId: uid, createdAt: new Date().toISOString() },
-          { id: "local_shop_2", name: "燕麥奶 1L", completed: true, userId: uid, createdAt: new Date().toISOString() },
-          { id: "local_shop_3", name: "全脂牛奶", completed: false, userId: uid, autoAdded: true, createdAt: new Date().toISOString() }
+        const initialShopping: ShoppingItem[] = [
+          {
+            id: "local_shop_yogurt",
+            name: "希臘優格（4入）",
+            completed: false,
+            userId: uid,
+            createdAt: new Date().toISOString()
+          }
         ];
         setShoppingItems(initialShopping);
         localStorage.setItem(`local_shopping_${uid}`, JSON.stringify(initialShopping));
