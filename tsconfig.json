@@ -21,6 +21,9 @@
       ]
     },
     "allowImportingTsExtensions": true,
-    "noEmit": true
+    "noEmit": true,
+    
+    // 💡 加上這一行，告訴 TypeScript 這是一個 Vite 專案！
+    "types": ["vite/client"] 
   }
 }
